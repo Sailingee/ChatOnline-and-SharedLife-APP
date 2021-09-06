@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:danc/Logic/Me.dart';
+import 'package:danc/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -55,7 +56,7 @@ class _InformationPageState extends State<InformationPage> {
                 Row(
                   children: [
                     Text("名 字 : ",style: TextStyle(fontSize: 20),),
-                    Expanded(child: TextField())
+                    Expanded(child: TextField(controller: name,))
                   ],
                 )
               ],
@@ -106,9 +107,32 @@ class _InformationPageState extends State<InformationPage> {
           .putFile(file);
       //上传名字
       FirebaseFirestore.instance.collection("users").doc(Me.me!.IDnumber).update(
-          {"name": name.text,"headImage":"uploads/${Me.me!.IDnumber}"});
+          {"name": name.text,"headImage":"uploads/${Me.me!.IDnumber}"}).then((value){
+            Me.me!.headImage = "uploads/${Me.me!.IDnumber}";
+            Me.me!.getHeadImage();
+            Me.me!.name = name.text;
+
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>HomePage()), (route) => false);
+
+          }).catchError((error){
+            Navigator.pop(context);
+            print(error);
+      });
       Fluttertoast.showToast(msg: "修改成功",toastLength: Toast.LENGTH_LONG);
-      Navigator.pop(context);
+
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (contex) {
+            return AlertDialog(
+              title: Center(child: Text('正在验证')),
+              contentPadding: EdgeInsets.fromLTRB(123, 0, 123, 0),
+              content: CircularProgressIndicator(),
+            );
+          });
+      //Navigator.pop(context);
+
+
     }
     catch(e){
       Fluttertoast.showToast(msg: "网络错误",toastLength: Toast.LENGTH_LONG);
