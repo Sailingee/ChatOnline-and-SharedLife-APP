@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "388967199074",
+    "project_id": "danc-65686",
+    "storage_bucket": "danc-65686.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388967199074:android:e1d341747aed45379e3c3b",
+        "android_client_info": {
+          "package_name": "com.example.danc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "388967199074-2b8kbbc2lfhlj7gkbm03e6ko4mpgnqgi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVzksuUyz1DkO0NWfbg4cSR1U0tKlVwkc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "388967199074-2b8kbbc2lfhlj7gkbm03e6ko4mpgnqgi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
