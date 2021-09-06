@@ -105,21 +105,8 @@ class _InformationPageState extends State<InformationPage> {
       await firebase_storage.FirebaseStorage.instance
           .ref(path)
           .putFile(file);
+
       //上传名字
-      FirebaseFirestore.instance.collection("users").doc(Me.me!.IDnumber).update(
-          {"name": name.text,"headImage":"uploads/${Me.me!.IDnumber}"}).then((value){
-            Me.me!.headImage = "uploads/${Me.me!.IDnumber}";
-            Me.me!.getHeadImage();
-            Me.me!.name = name.text;
-
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>HomePage()), (route) => false);
-
-          }).catchError((error){
-            Navigator.pop(context);
-            print(error);
-      });
-      Fluttertoast.showToast(msg: "修改成功",toastLength: Toast.LENGTH_LONG);
-
       showDialog(
           barrierDismissible: false,
           context: context,
@@ -130,9 +117,22 @@ class _InformationPageState extends State<InformationPage> {
               content: CircularProgressIndicator(),
             );
           });
+
+
+      await FirebaseFirestore.instance.collection("users").doc(Me.me!.IDnumber).update(
+          {"name": name.text,"headImage":"uploads/${Me.me!.IDnumber}"}).then((value){
+           print(path);
+            Me.me!.headImage = "uploads/${Me.me!.IDnumber}";
+            Me.me!.getHeadImage();
+            Me.me!.name = name.text;
+            Fluttertoast.showToast(msg: "修改成功",toastLength: Toast.LENGTH_LONG);
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>HomePage()), (route) => false);
+
+          }).catchError((error){
+            Navigator.pop(context);
+            print(error);
+      });
       //Navigator.pop(context);
-
-
     }
     catch(e){
       Fluttertoast.showToast(msg: "网络错误",toastLength: Toast.LENGTH_LONG);
