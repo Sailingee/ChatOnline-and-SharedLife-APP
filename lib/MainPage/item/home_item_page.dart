@@ -22,12 +22,13 @@ class HomeItemPage extends StatefulWidget {
 
 class _HomeItemPageState extends State<HomeItemPage> {
   late TextEditingController commentController;
-  ScrollController? controller;
+
+  //ScrollController? controller;
 
   @override
   void initState() {
     initiaStream();
-    controller = new ScrollController();
+    //controller = new ScrollController();
     commentController = new TextEditingController();
     super.initState();
   }
@@ -76,10 +77,10 @@ class _HomeItemPageState extends State<HomeItemPage> {
         }
         return Center(
             child: Container(
-          width: 200,
-          height: 200,
-          child: CircularProgressIndicator(),
-        ));
+              width: 200,
+              height: 200,
+              child: CircularProgressIndicator(),
+            ));
       },
     );
   }
@@ -117,129 +118,291 @@ class _HomeItemPageState extends State<HomeItemPage> {
     return showListMSG();
   }
 
+  bool mIsExpansion = false;
+// 最大显示行数
+  int mMaxLine = 5;
+
+  //region
+  //[_text ] 传入的字符串
+  Widget _RichText(String _text) {
+    if (IsExpansion(_text)) {
+      //是否截断
+      if (mIsExpansion) {
+        return Column(
+          children: <Widget>[
+            new Text(
+              _text,
+              textAlign: TextAlign.left,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FlatButton(
+                onPressed: () {
+                  _isShowText();
+                },
+                child: Text("收起"),
+                textColor: Colors.grey,
+              ),
+            ),
+          ],
+        );
+      } else {
+        return Column(
+          children: <Widget>[
+            new Text(
+              _text,
+              maxLines: 3,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FlatButton(
+                onPressed: () {
+                  _isShowText();
+                },
+                child: Text("..全文"),
+                textColor: Colors.grey,
+              ),
+            ),
+          ],
+        );
+      }
+    } else {
+      return Text(
+        _text,
+        maxLines: 3,
+        textAlign: TextAlign.left,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+  }
+
+  bool IsExpansion(String text) {
+    TextPainter _textPainter = TextPainter(
+        maxLines: 3,
+        text: TextSpan(
+            text: text, style: TextStyle(fontSize: 16.0, color: Colors.black)),
+        textDirection: TextDirection.ltr)
+      ..layout(maxWidth: 100, minWidth: 50);
+    if (_textPainter.didExceedMaxLines) {
+      //判断 文本是否需要截断
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void _isShowText() {
+    if (mIsExpansion) {
+      //关闭
+      setState(() {
+        mIsExpansion = false;
+      });
+    } else {
+      //打开
+      setState(() {
+        mIsExpansion = true;
+      });
+    }
+  }
+
+  int currentPicture = 0;
+
   Widget MSG(Message? message_obj) {
-    int currentPicture = 0;
     return Container(
-        margin: EdgeInsets.all(10),
-        child: Card(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: EdgeInsets.only(top: 10),
-                height: 280,
-                child: Swiper(
-                  itemCount: message_obj!.imageListUrl.length,
-                  onIndexChanged: (ind) {
-                    currentPicture = ind;
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    //返回的Swiper图片集
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ShowPicturePage(
-                                    imageList: message_obj.imageListUrl,
-                                    index: currentPicture)));
-                      },
-                      child: Image.network(message_obj.imageListUrl[index],
-                          fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          alignment: Alignment.center,
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      }),
-                    );
-                  },
-                  pagination: new SwiperPagination(
-                      builder: DotSwiperPaginationBuilder(
-                          color: Colors.black54,
-                          activeColor: Colors.white,
-                          size: 8)),
-                ),
-              ),
-
-              /*头像 名字 标题 内容*/
-              ListTile(
-                leading: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                        margin: EdgeInsets.only(top: 5, bottom: 5, right: 10),
-                        child: ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(60.0)),
-                          // child: Image.network(
-                          //     message_obj.head_picture), //需要修改为netWork
-                          child: CircleAvatar(
-                            radius: 36.0,
-                            backgroundImage: NetworkImage(
-                              message_obj.head_picture,
-                            ),
-                          ),
-                        )),
-                    Text(
-                      message_obj.name,
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                    )
-                  ],
-                ),
-                title: Text(
-                  message_obj.title,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(10),
-                child: Text(
-                  message_obj.article,
-                  textAlign: TextAlign.start,
-                  style: TextStyle(fontWeight: FontWeight.w400, fontSize: 15),
-                ),
-              ),
-              Divider(
-                height: 15,
-                color: Colors.grey.withOpacity(0.6),
-              ),
-
-              /*喜欢 评论*/
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(),
-                  LikeIcon(message_obj),
-                  InkWell(
-                    onTap: () {
-                      showBottomFuction(message_obj);
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.mode_comment_outlined),
-                      ],
+      decoration:
+      BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
+      child: Column(
+        children: [
+          Container(
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  margin: EdgeInsets.all(5),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(60.0)),
+                    child: CircleAvatar(
+                      radius: 36.0,
+                      backgroundImage: NetworkImage(
+                        message_obj!.head_picture,
+                      ),
                     ),
                   ),
-                  SizedBox(),
-                ],
-              ),
-              SizedBox(
-                height: 5,
-              )
-            ],
+                ),
+                Container(
+                  margin: EdgeInsets.only(right: 20),
+                  child: Text(
+                    message_obj.name,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+                  ),
+                  alignment: Alignment.topLeft,
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(right: 10),
+                    alignment: Alignment.centerRight,
+                    child: PopupMenuButton(
+                      icon: Icon(Icons.more_horiz),
+                      itemBuilder: (BuildContext context) {
+                        return <PopupMenuEntry>[
+                          const PopupMenuItem(
+                            value: "follow",
+                            child: Text("关注"),
+                          ),
+                          const PopupMenuItem(
+                            value: "collection",
+                            child: Text("收藏"),),
+                        ];
+                      },
+                      onSelected: (value){
+                        String v1 = message_obj.creatorID!;
+                        String v2 = message_obj.messageID.toString();
+                        String v3 = v1+v2;
+                        if(value == "follow"){
+                          var doc = FirebaseFirestore.instance.collection("users").doc(
+                            v1
+                          );
+                          FutureData.follow_click(doc);
+                          Fluttertoast.showToast(msg: "关注成功");
+                        }
+                        if(value == "collection"){
+
+                          var doc = FirebaseFirestore.instance.collection("messages").doc(
+                              v3);
+                          FutureData.collection_click(doc);
+                          Fluttertoast.showToast(msg: "收藏成功");
+                        }
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
-        ));
+          Container(
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
+            height: 280,
+            child: Swiper(
+                itemCount: message_obj.imageListUrl.length,
+                onIndexChanged: (ind) {
+                  currentPicture = ind;
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  //返回的Swiper图片集
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ShowPicturePage(
+                                      imageList: message_obj.imageListUrl,
+                                      index: currentPicture)));
+                    },
+                    child: Image.network(
+                        message_obj.imageListUrl[index].toString(),
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            alignment: Alignment.center,
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        }),
+                  );
+                }),
+          ),
+          Container(
+            margin: EdgeInsets.fromLTRB(5, 5, 5, 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        LikeIcon(message_obj),
+                        SizedBox(
+                          width: 50,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            showBottomFuction(message_obj);
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("评论..", style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w100),)
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 30,
+                        ),
+
+                      ],
+                    )),
+              ],
+            ),
+          ),
+          Container(
+            /*child: Text(
+              widget.tweetData.article,
+               textAlign: TextAlign.left,
+            ),*/
+            child: Wrap(
+              children: [
+                Text(
+                  "#" + message_obj.title + "     ",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                _RichText(message_obj.article)
+              ],
+            ),
+            alignment: Alignment.topLeft,
+            margin: EdgeInsets.all(5),
+          ),
+          Divider(
+            height: 15,
+            color: Colors.grey.withOpacity(0.6),
+          ),
+        ],
+      ),
+    );
   }
+
+  Widget collection_InkWell(Message? message_obj) {
+    return InkWell(
+      onTap: () {
+        String v1 = message_obj!.creatorID!;
+        String v2 = message_obj.messageID.toString();
+        String v3 = v1+v2;
+        var doc = FirebaseFirestore.instance.collection("message").doc(
+            v3);
+        FutureData.collection_click(doc);
+      },
+      child: Text("关注"),
+    );
+  }
+
 
   Widget commentItemFunction(Message message_obj) {
     return Container(
@@ -267,11 +430,14 @@ class _HomeItemPageState extends State<HomeItemPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.7,
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.7,
                             child: TextField(
                               controller: commentController,
                               decoration:
-                                  InputDecoration(border: OutlineInputBorder()),
+                              InputDecoration(border: OutlineInputBorder()),
                               cursorHeight: 30,
                             ),
                           ),
@@ -286,7 +452,7 @@ class _HomeItemPageState extends State<HomeItemPage> {
                                 Me me = Me.getInstance();
                                 me
                                     .upLoadComment(message_obj, me.name,
-                                        commentController.text)
+                                    commentController.text)
                                     .then((value) {
                                   commentController.text = '';
                                 });
@@ -306,44 +472,67 @@ class _HomeItemPageState extends State<HomeItemPage> {
           ),
           Expanded(
               child: Container(
-            child: FutureBuilder(
-              future: message_obj.commonts!.get(),
-              builder: (context,AsyncSnapshot snapshots) {
-                if(snapshots.hasError)
-                  return Text("hasError");
-                if(snapshots.connectionState == ConnectionState.done)
-                  {
+                child: FutureBuilder(
+                  future: message_obj.commonts!.get(),
+                  builder: (context, AsyncSnapshot snapshots) {
+                    if (snapshots.hasError) return Text("hasError");
+                    if (snapshots.connectionState == ConnectionState.done) {
+                      return ListView.builder(
+                          itemCount: snapshots.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            String image =
+                            snapshots.data!.docs[index]['head_image'];
+                            String name = snapshots.data!.docs[index]['name'];
+                            String comment = snapshots.data!
+                                .docs[index]['comment'];
 
-                    return ListView.builder(
-                        itemCount: snapshots.data!.docs.length,
-                        itemBuilder: (context,index){
-                          String image = snapshots.data!.docs[index]['head_image'];
-                          String name = snapshots.data!.docs[index]['name'];
-                          String comment = snapshots.data!.docs[index]['comment'];
-
-                          return Container(
-                            child:Row(
-                              children: [
-                                SizedBox(width: 20,),
-                                Flexible(child: Column(
-                                  mainAxisSize: MainAxisSize.min,
+                            return Container(
+                                child: Row(
                                   children: [
-                                    Container(margin: EdgeInsets.all(7),width: 55,height: 55,child: CircleAvatar(backgroundImage: NetworkImage(image),radius: 36,),),
-                                    Text(name,style: TextStyle(fontSize: 17,fontWeight: FontWeight.w500),)
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    Flexible(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.all(7),
+                                            width: 55,
+                                            height: 55,
+                                            child: CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  image),
+                                              radius: 36,
+                                            ),
+                                          ),
+                                          Text(
+                                            name,
+                                            style: TextStyle(
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w500),
+                                          )
+                                        ],
+                                      ),
+                                      flex: 1,
+                                    ),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    Flexible(
+                                      child:
+                                      Text(comment,
+                                          style: TextStyle(fontSize: 16)),
+                                      flex: 3,
+                                    )
                                   ],
-                                ),flex: 1,),
-                                SizedBox(width: 20,),
-                                Flexible(child: Text(comment,style: TextStyle(fontSize: 16)),flex: 3,)
-                              ],
-                            )
-                          );
-                    });
-
-                  }
-                return Text("loading");
-              },
-            ),
-          ))
+                                ));
+                          });
+                    }
+                    return Text("loading");
+                  },
+                ),
+              ))
         ],
       ),
     );
@@ -390,13 +579,16 @@ class _HomeItemPageState extends State<HomeItemPage> {
 class LikeIcon extends StatefulWidget {
   LikeIcon(this.message_obj, {Key? key}) : super(key: key);
   Message message_obj;
+
   @override
   _LikeIconState createState() => _LikeIconState(this.message_obj);
 }
 
 class _LikeIconState extends State<LikeIcon> {
   _LikeIconState(this.message_obj);
+
   Message message_obj;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -422,9 +614,9 @@ class _LikeIconState extends State<LikeIcon> {
           message_obj.isLike == false
               ? Icon(Icons.mood)
               : Icon(
-                  Icons.mood,
-                  color: Colors.orange,
-                ),
+            Icons.mood,
+            color: Colors.cyan,
+          ),
           Text((message_obj.likes.length).toString())
         ],
       ),

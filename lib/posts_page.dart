@@ -106,7 +106,6 @@ class _PostsPageState extends State<PostsPage> {
   Widget inputArea() {
     return Container(
       height: MediaQuery.of(context).size.width,
-
       alignment: Alignment.bottomCenter,
       child: Column(
         children: [
@@ -170,7 +169,6 @@ class _PostsPageState extends State<PostsPage> {
                   alignment: Alignment.bottomCenter,
                   child: inputArea(),
                 ),
-
               ],
             )));
   }
@@ -282,7 +280,6 @@ class _PostsPageState extends State<PostsPage> {
         articleController.text, 'uploads/$mainDir/$upDir/');
     CollectionReference ref = FirebaseFirestore.instance.collection('messages');
     CollectionReference users = FirebaseFirestore.instance.collection('users');
-
     await ref
         .doc(upDir)
         .set({
@@ -300,7 +297,6 @@ class _PostsPageState extends State<PostsPage> {
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
 
-
     me.Posts.add(ref.doc(upDir));
 
     users
@@ -308,7 +304,28 @@ class _PostsPageState extends State<PostsPage> {
         .update({'Posts': me.Posts})
         .then((value) => print("User Updated"))
         .catchError((error) => print("Failed to update user: $error"));
-
+    PostNewsForFollowers();
     return true;
+  }
+
+  Future<void> PostNewsForFollowers() async {
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(Me.me!.IDnumber)
+        .collection("followers")
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        print("posts operation!!");
+        print(doc["follower"]);
+        int start = doc["follower"].toString().indexOf("(")+1;
+        int end = doc["follower"].toString().indexOf(")");
+        String path = doc["follower"].toString().substring(start,end);
+        FirebaseFirestore.instance.doc(path).collection("follows").doc(Me.me!.IDnumber).update({
+          "news":true
+        });
+
+      });
+    });
   }
 }

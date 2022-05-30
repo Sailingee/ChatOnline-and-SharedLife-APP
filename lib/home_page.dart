@@ -1,3 +1,4 @@
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:danc/MainPage/main_chatting_page.dart';
 import 'package:danc/MainPage/main_setting_page.dart';
 import 'package:flutter/material.dart';
@@ -30,27 +31,60 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        items: bottomNavigationBarItem,
-        selectedItemColor: Colors.red,
-        currentIndex: currentIndex,
-        onTap: (int ind) {
+      bottomNavigationBar: BottomNavyBar(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        selectedIndex: currentIndex,
+        onItemSelected: (index) {
           setState(() {
-            currentIndex = ind;
+            //_pageController.jumpToPage(index);
+            currentIndex = index;
+
           });
+          _pageController.jumpToPage(index);
         },
+        items: <BottomNavyBarItem>[
+          BottomNavyBarItem(
+              title: Text('推送'),
+              icon: Icon(Icons.home)
+          ),
+          BottomNavyBarItem(
+              title: Text('联系人'),
+              icon: Icon(Icons.people)
+          ),
+          BottomNavyBarItem(
+              title: Text('设置'),
+              icon: Icon(Icons.settings)
+          ),
+        ],
       ),
       body: isLoginPage()
     );
   }
+  late PageController _pageController;
 
-  //检查是否有登陆缓存 有过登陆就不需要再刷新页面
+
+  @override
+  void initState() {
+    _pageController = new PageController();
+  } //检查是否有登陆缓存 有过登陆就不需要再刷新页面
   Widget isLoginPage()
   {
     if(Me.me==null && currentIndex!=0 ){
-      return  list[currentIndex];
+      return PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() => currentIndex = index);
+        },
+        children: <Widget>[
+          HomePage(),
+          ChattingPage(),
+          SettingPage()
+        ],
+      );
+      //return  list[currentIndex];
     }
     return IndexedStack(index: currentIndex,children: list);
+    //return Container();
   }
 
 

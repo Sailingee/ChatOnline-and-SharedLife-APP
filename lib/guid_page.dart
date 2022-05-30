@@ -56,7 +56,7 @@ class _GuidState extends State<GuidPage> {
                     )),
                 Container(margin: EdgeInsets.all(20),child: Center(
 
-                  child: Text("该程序使用Google Firebase进行存储，请使用该程序前确保可以正常连接外网",style: TextStyle(color: Colors.white,fontSize: 20),),
+                  child: Text("该程序使用Google Firebase进行存储，请使用该程序前确保可以正常连接网络",style: TextStyle(color: Colors.white,fontSize: 20),),
                 ),)
 
 

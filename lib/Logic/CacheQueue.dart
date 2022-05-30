@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:danc/MainPage/item/Message.dart';
 
 class MessageCacheQueue{

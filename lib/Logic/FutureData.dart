@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:danc/Logic/Follower.dart';
 import 'package:danc/Logic/Me.dart';
 import 'package:danc/MainPage/item/Message.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -7,9 +8,18 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FutureData {
+  static Future<Message> getCollectionStreamMessage(dc) async {
+    var ref = dc['collection'];
+    int start = ref.toString().indexOf("(") + 1;
+    int end = ref.toString().indexOf(")");
+    var doc_ref = ref.toString().substring(start, end);
+    return await FirebaseFirestore.instance.doc(doc_ref).get().then((docs) {
+      return getStreamMessage(docs);
+    });
+  }
 
   //获取每一条Message快照
-  static Future<Message> getStreamMessage(dc) async{
+  static Future<Message> getStreamMessage(dc) async {
     late List<String> imagesUrl = [];
     late String head_picture;
     late String name;
@@ -43,7 +53,7 @@ class FutureData {
     Message ms;
 
     ms = Message.downLoad(imagesUrl, head_picture, name, title, article,
-         messageID, creatorID, likes,
+        messageID, creatorID, likes,
         isLike: isLike);
 
     return ms;
@@ -111,8 +121,34 @@ class FutureData {
         .get();
   }
 
-  static getMessageSnap() async{
-    return FirebaseFirestore.instance.collection('messages').orderBy('date',descending: true).snapshots();
+  static getMessageSnap() async {
+    return FirebaseFirestore.instance
+        .collection('messages')
+        .orderBy('date', descending: true)
+        .snapshots();
+  }
+
+  static getCollectionSnap() async {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(Me.me!.IDnumber)
+        .collection('collections')
+        .snapshots();
+  }
+
+  static getHotMessageSnap() async {
+    return FirebaseFirestore.instance
+        .collection('messages')
+        .orderBy('like_amount', descending: true)
+        .snapshots();
+  }
+
+  static getSearchMessageSnap(String search) async {
+    return FirebaseFirestore.instance
+        .collection('messages')
+        .where('title', isGreaterThanOrEqualTo: search)
+        .where('title', isLessThan: search + 'zzzzzzzzzzzzzz')
+        .snapshots();
   }
 
   //获取聊天数据库快照
@@ -122,21 +158,18 @@ class FutureData {
         .where('users', arrayContains: IDnumber)
         .snapshots();
   }
+
   //向数据库中添加聊天室
-  static creatChatRoom(String opID){
-    if(opID==Me.me!.IDnumber)
-      return;
-    String ID = Me.me!.IDnumber+"_"+opID;
-    FirebaseFirestore.instance
-        .collection('ChatWith').doc(ID).set({
-      opID:true,
-      Me.me!.IDnumber:true,
-      "id":ID,
-      "time":DateTime.now(),
-      "users":[Me.me!.IDnumber,opID]
+  static creatChatRoom(String opID) {
+    if (opID == Me.me!.IDnumber) return;
+    String ID = Me.me!.IDnumber + "_" + opID;
+    FirebaseFirestore.instance.collection('ChatWith').doc(ID).set({
+      opID: true,
+      Me.me!.IDnumber: true,
+      "id": ID,
+      "time": DateTime.now(),
+      "users": [Me.me!.IDnumber, opID]
     });
-
-
   }
 
   //每个用户都有唯一的ID值和唯一文档，返回该文档
@@ -203,14 +236,67 @@ class FutureData {
         .update({opID: false});
   }
 
+  static Future<Follower> getFollower(doc) async {
+    Follower follower = new Follower();
+    var ref = FirebaseFirestore.instance.doc(doc);
+    print("ref!!");
+    print(ref);
+    return ref.get().then((value) async {
+      print("ref start");
+      follower.IDnumber = value["IDnumber"];
+      print(follower.IDnumber);
+      follower.headImage = value["headImage"];
+      follower.name = value["name"];
 
+      String downloadURL = await firebase_storage.FirebaseStorage.instance
+          .ref('${follower.headImage}/headImage.png')
+          .getDownloadURL();
+      print('${follower.headImage}/headImage.png');
+      follower.headImage = downloadURL;
+      print("follower end");
+      return follower;
+    });
+  }
+
+  static Future<void> collection_click(doc) async {
+    Me me = Me.getInstance();
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(me.IDnumber)
+        .collection("collections")
+        .add({"collection": doc});
+  }
+
+  static Future<void> follow_click(doc) async {
+    int start = doc.toString().lastIndexOf("/") + 1;
+    int end = doc.toString().indexOf(")");
+    String path = doc.toString().substring(start, end);
+    Me me = Me.getInstance();
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(me.IDnumber)
+        .collection("follows")
+        .doc(path)
+        .set({
+      "news": false,
+      "follow": doc,
+    });
+     var mine =  FirebaseFirestore.instance.collection("users").doc(Me.me!.IDnumber);
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(path)
+        .collection("followers")
+        .doc(Me.me!.IDnumber)
+        .set({
+      "follower": mine
+    });
+  }
 }
 
 class UserRequired {
   static Future<bool> signUpAuthorization(
       String IDnumber, String name, String password) async {
     if (authorFormat(IDnumber, name, password) == false) {
-
       return false;
     }
     await FirebaseFirestore.instance
@@ -242,16 +328,37 @@ class UserRequired {
         });
   }
 
+  //添加收藏
+  static Future<bool> collection(Message msg) async {
+    //查询
+    Me me = Me.getInstance();
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(me.IDnumber)
+        .collection("collections")
+        .where("messageID", isEqualTo: msg.messageID)
+        .get()
+        .then((docs) {
+      if (docs.docs.length >= 1) {
+        return false;
+      }
+    });
+    //FirebaseFirestore.instance.collection("user").doc(me.IDnumber).collection("collections").add();
+    return true;
+  }
+
   static bool authorFormat(String IDnumber, String name, String password) {
     try {
-      if(IDnumber.length!=11){
-        Fluttertoast.showToast(msg: "请输入正确的11位手机号码",toastLength: Toast.LENGTH_LONG);
+      if (IDnumber.length != 11) {
+        Fluttertoast.showToast(
+            msg: "请输入正确的11位手机号码", toastLength: Toast.LENGTH_LONG);
         return false;
       }
       num.parse(IDnumber);
       return true;
     } catch (error) {
-      Fluttertoast.showToast(msg: "请输入正确的11位手机号码",toastLength: Toast.LENGTH_LONG);
+      Fluttertoast.showToast(
+          msg: "请输入正确的11位手机号码", toastLength: Toast.LENGTH_LONG);
       return false;
     }
   }

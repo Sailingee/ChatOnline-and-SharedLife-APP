@@ -17,6 +17,7 @@ class _ChattingPageState extends State<ChattingPage> {
   bool isSearching = false;
 
   Widget noneLoginPage() {
+    print("none login");
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -28,7 +29,7 @@ class _ChattingPageState extends State<ChattingPage> {
             },
             child: Text("Login"),
             style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.orange)
+                backgroundColor: MaterialStateProperty.all(Colors.cyan)
             ),
           )
         ],
@@ -42,7 +43,7 @@ class _ChattingPageState extends State<ChattingPage> {
       return noneLoginPage();
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.cyan,
         title: Text('聊天'),
         centerTitle: true,
         actions: [

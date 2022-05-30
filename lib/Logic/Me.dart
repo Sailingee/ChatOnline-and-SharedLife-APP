@@ -29,7 +29,6 @@ class Me {
         .ref('${me!.headImage}/headImage.png')
         .getDownloadURL();
     head_picture = downloadURL;
-
   }
   Future<void> initia(String IDnumber, String name, String password, String headImage,
       int docId) async {

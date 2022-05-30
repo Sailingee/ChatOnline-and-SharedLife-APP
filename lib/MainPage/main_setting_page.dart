@@ -1,10 +1,12 @@
 import 'package:danc/Logic/Me.dart';
 import 'package:danc/MainPage/Login.dart';
+import 'package:danc/MainPage/item/MyCollections_page.dart';
+import 'package:danc/MainPage/item/MyFollows.dart';
 import 'package:danc/MainPage/item/information_page.dart';
+import 'package:danc/index_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../home_page.dart';
 import 'item/my_posts_page.dart';
 
 class SettingPage extends StatefulWidget {
@@ -27,17 +29,27 @@ class _SettingPageState extends State<SettingPage> {
     informationList = <SettingsList>[
       SettingsList(
         index: SettingsIndex.MyPosts,
-        labelName: 'My Posts',
+        labelName: '我的上传',
         icon: Icon(Icons.photo_camera_back),
       ),
       SettingsList(
+        index: SettingsIndex.MyCollections,
+        labelName: '我的收藏',
+        icon: Icon(Icons.collections)
+      ),
+      SettingsList(
+        index: SettingsIndex.Follows,
+        labelName: '我的关注',
+        icon: Icon(Icons.nature_people_rounded)
+      ),
+      SettingsList(
         index: SettingsIndex.Information,
-        labelName: 'Information',
+        labelName: '修改个人信息',
         icon: Icon(Icons.person),
       ),
       SettingsList(
         index: SettingsIndex.About,
-        labelName: 'About',
+        labelName: '关于',
         icon: Icon(Icons.info),
       ),
     ];
@@ -181,7 +193,7 @@ class _SettingPageState extends State<SettingPage> {
         me != null
             ? ListTile(
           title: Text(
-            'Sign Out',
+            '退出登录',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 16,
@@ -200,7 +212,7 @@ class _SettingPageState extends State<SettingPage> {
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => HomePage()),
+                      builder: (context) => IndexPage()),
                       (route) => false);
               Fluttertoast.showToast(
                   msg: '已登出', toastLength: Toast.LENGTH_LONG);
@@ -273,7 +285,7 @@ class _SettingPageState extends State<SettingPage> {
   void selectedListData(SettingsList listData){
     switch(listData.index){
       case SettingsIndex.About:
-        Fluttertoast.showToast(msg: "About",toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(msg: "About",toastLength: Toast.LENGTH_SHORT);
         break;
       case SettingsIndex.Information:
         Navigator.push(context,MaterialPageRoute(builder: (context)=>InformationPage()));
@@ -281,6 +293,14 @@ class _SettingPageState extends State<SettingPage> {
       case SettingsIndex.MyPosts:
         Navigator.push(context,MaterialPageRoute(builder: (context)=>MyPosts()));
         break;
+      case SettingsIndex.MyCollections:
+        Navigator.push(context,MaterialPageRoute(builder: (context)=>MyCollectionsPage()));
+        break;
+      case SettingsIndex.Follows:
+        Navigator.push(context,MaterialPageRoute(builder: (context)=>MyFollow()));
+        break;
+      default:
+        Fluttertoast.showToast(msg: "Error",toastLength: Toast.LENGTH_LONG);
     }
   }
 
@@ -295,6 +315,8 @@ enum SettingsIndex {
   Home,
   Help,
   About,
+  MyCollections,
+  Follows
 }
 
 class SettingsList {
