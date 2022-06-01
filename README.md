@@ -34,8 +34,9 @@
 
 
 ![3](https://user-images.githubusercontent.com/49642381/132213345-a40f6b2d-9ce2-4259-8f67-7a26e89847de.PNG)
+</br>
 ![ani1](https://user-images.githubusercontent.com/49642381/132213353-f2390a41-d247-4743-b669-98bc793db79f.gif)
-![ani2](https://user-images.githubusercontent.com/49642381/132213355-c62cfa94-ac1a-4912-8267-cbb7f1387a57.gif)
+
 
 
 ![5](https://user-images.githubusercontent.com/49642381/132213352-b665d9dc-5b98-491b-aa6b-18e65dbbb5a1.PNG)
