@@ -8,24 +8,24 @@
 
 + 引导页面
 
-![2](https://user-images.githubusercontent.com/49642381/132213343-15e4a648-6169-439b-9b63-80f5dbfc9566.PNG)
- 
+ ![4284464883a957cf1c04b4eab269784](https://user-images.githubusercontent.com/49642381/171317365-36099f19-c8df-44bd-a3cc-702ea8b9cc4d.png)
 
 
 
 + 主页
 
-![1](https://user-images.githubusercontent.com/49642381/132213338-d36f1d1e-997c-4c11-b25a-7bbc4f238cdb.PNG)
-  
-![ani3](https://user-images.githubusercontent.com/49642381/132213358-57f0965a-dcb6-4bef-9519-1fd3db184d73.gif)
+![主界面](https://user-images.githubusercontent.com/49642381/171317388-8558979b-8748-4f6a-920c-e6295f35efe9.gif)
+</br>
+![个人设置](https://user-images.githubusercontent.com/49642381/171317393-7d3402c2-a4df-4403-83cb-3e68a9ba6900.gif)
 
  
 
 + 评论区
 
-  
+  ![b7dec2623cc38ca62c337b6f1953e99](https://user-images.githubusercontent.com/49642381/171318322-2de5253d-2948-46c0-95db-739a49538537.png)
 
-![4](https://user-images.githubusercontent.com/49642381/132213350-db7347bc-d8f6-4c9c-b722-236b26bf2196.PNG)
+
+
 
 
 
